@@ -5,22 +5,25 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 class UserServiceImpl implements UserService {
     private final UserRepository repository;
-    private static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
 
     @Override
-    public List<User> getAllUsers() {
-        return repository.findAll();
+    public List<UserDto> getAllUsers() {
+        List<User> users = repository.findAll();
+        return UserMapper.mapToUserDto(users);
     }
 
+    @Transactional
     @Override
-    public User saveUser(User user) {
-        log.info("Создаем пользователя {}", user.getName());
-        return repository.save(user);
+    public UserDto saveUser(UserDto userDto) {
+        User user = repository.save(UserMapper.mapToNewUser(userDto));
+        return UserMapper.mapToUserDto(user);
     }
 }
